@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configure Chart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <main class="w-full max-w-5xl bg-white shadow-lg rounded-2xl p-8">
+    
+    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">📊 Configure Chart</h1>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="mb-4 space-y-2">
+          {% for message in messages %}
+            <li class="bg-red-100 text-red-700 px-4 py-2 rounded-lg text-sm">
+              {{ message }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Suggestions -->
+    <section class="mb-6">
+      <h3 class="text-lg font-semibold text-gray-700 mb-3">Suggestions</h3>
+      <div class="flex flex-wrap gap-2">
+        {% for ctype, sx, sy in suggestions %}
+          <form action="" method="post" class="inline">
+            <input type="hidden" name="chart" value="{{ ctype }}">
+            <input type="hidden" name="x" value="{{ sx }}">
+            <input type="hidden" name="y" value="{{ sy }}">
+            <input type="hidden" name="title" value="Suggested: {{ ctype|capitalize }}">
+            <button type="submit" 
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition">
+              {{ ctype|capitalize }} (x={{ sx }}{% if sy %}, y={{ sy }}{% endif %})
+            </button>
+          </form>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Chart Config Form -->
+    <form action="" method="post" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Chart Type -->
+        <label class="flex flex-col text-sm font-medium text-gray-700">
+          Chart Type
+          <select name="chart" required
+            class="mt-1 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            {% for value, label in chart_types %}
+              <option value="{{ value }}" {% if selected.chart==value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <!-- X Axis -->
+        <label class="flex flex-col text-sm font-medium text-gray-700">
+          X Axis
+          <select name="x"
+            class="mt-1 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            <option value="">(none)</option>
+            {% for c in columns %}
+              <option value="{{ c }}" {% if selected.x==c %}selected{% endif %}>{{ c }} ({{ kinds[c] }})</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <!-- Y Axis -->
+        <label class="flex flex-col text-sm font-medium text-gray-700">
+          Y Axis
+          <select name="y"
+            class="mt-1 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            <option value="">(none)</option>
+            {% for c in columns %}
+              <option value="{{ c }}" {% if selected.y==c %}selected{% endif %}>{{ c }} ({{ kinds[c] }})</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <!-- Color -->
+        <label class="flex flex-col text-sm font-medium text-gray-700">
+          Color (Group)
+          <select name="color"
+            class="mt-1 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            <option value="">(none)</option>
+            {% for c in columns %}
+              <option value="{{ c }}" {% if selected.color==c %}selected{% endif %}>{{ c }} ({{ kinds[c] }})</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <!-- Aggregate -->
+        <label class="flex flex-col text-sm font-medium text-gray-700">
+          Aggregate (for Bar/Pie)
+          <select name="agg"
+            class="mt-1 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            <option value="">(none)</option>
+            <option value="sum" {% if selected.agg=='sum' %}selected{% endif %}>Sum</option>
+            <option value="mean" {% if selected.agg=='mean' %}selected{% endif %}>Average</option>
+            <option value="count" {% if selected.agg=='count' %}selected{% endif %}>Count</option>
+            <option value="median" {% if selected.agg=='median' %}selected{% endif %}>Median</option>
+          </select>
+        </label>
+
+        <!-- Title -->
+        <label class="flex flex-col text-sm font-medium text-gray-700">
+          Title
+          <input type="text" name="title" value="{{ selected.title or '' }}" placeholder="Chart title"
+            class="mt-1 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </label>
+
+        <!-- Palette -->
+        <label class="flex flex-col text-sm font-medium text-gray-700">
+          Palette / Scale
+          <input type="text" name="palette" value="{{ selected.palette or '' }}" placeholder="e.g., Viridis, Plasma"
+            class="mt-1 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </label>
+      </div>
+
+      <button type="submit"
+        class="w-full bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition">
+        Update Chart
+      </button>
+    </form>
+
+    <!-- Chart Preview -->
+    {% if fig_html %}
+      <section class="mt-8 bg-gray-50 rounded-xl p-6 shadow-inner">
+        {{ fig_html | safe }}
+        <form action="{{ url_for('download_png', upload_id=upload_id) }}" method="post" class="mt-4">
+          <input type="hidden" name="chart" value="{{ selected.chart }}">
+          <input type="hidden" name="x" value="{{ selected.x or '' }}">
+          <input type="hidden" name="y" value="{{ selected.y or '' }}">
+          <input type="hidden" name="color" value="{{ selected.color or '' }}">
+          <input type="hidden" name="agg" value="{{ selected.agg or '' }}">
+          <input type="hidden" name="title" value="{{ selected.title or '' }}">
+          <input type="hidden" name="palette" value="{{ selected.palette or '' }}">
+          <button type="submit"
+            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
+            Download PNG
+          </button>
+        </form>
+      </section>
+    {% endif %}
+
+    <p class="mt-6 text-center">
+      <a href="/" class="text-blue-600 hover:underline">⬅️ Upload another file</a>
+    </p>
+  </main>
+</body>
+</html>

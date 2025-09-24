@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <main class="w-full max-w-lg bg-white shadow-lg rounded-2xl p-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">📂 Upload CSV</h1>
+    
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="mb-4 space-y-2">
+          {% for message in messages %}
+            <li class="bg-red-100 text-red-700 px-4 py-2 rounded-lg text-sm">
+              {{ message }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Upload form -->
+    <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data" class="space-y-4">
+      <input 
+        type="file" 
+        name="file" 
+        accept=".csv" 
+        required 
+        class="block w-full text-sm text-gray-700 
+               file:mr-4 file:py-2 file:px-4 
+               file:rounded-lg file:border-0
+               file:text-sm file:font-semibold
+               file:bg-blue-600 file:text-white
+               hover:file:bg-blue-700
+               cursor-pointer"
+      />
+      <button 
+        type="submit" 
+        class="w-full bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition">
+        Upload
+      </button>
+    </form>
+
+    <!-- Tips -->
+    <details class="mt-6 bg-gray-50 rounded-lg p-4">
+      <summary class="cursor-pointer font-semibold text-gray-700">💡 Tips</summary>
+      <p class="mt-2 text-sm text-gray-600">
+        Supported: UTF-8 / CP1252 CSV.<br>
+        We attempt automatic date parsing and trimming.
+      </p>
+    </details>
+  </main>
+</body>
+</html>
