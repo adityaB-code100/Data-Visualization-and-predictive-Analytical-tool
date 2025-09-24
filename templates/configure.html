@@ -5,18 +5,429 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Configure Chart</title>
   <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-  <main class="w-full max-w-5xl bg-white shadow-lg rounded-2xl p-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --primary-dark: #3a56d4;
+      --secondary-color: #7209b7;
+      --accent-color: #4cc9f0;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --error-color: #ef4444;
+      --light-bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-primary: #2d3748;
+      --text-secondary: #4a5568;
+    }
     
-    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">📊 Configure Chart</h1>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      animation: gradientShift 15s ease infinite;
+      background-size: 200% 200%;
+    }
+    
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    main {
+      box-shadow: 
+        0 10px 25px -5px rgba(0, 0, 0, 0.1), 
+        0 10px 10px -5px rgba(0, 0, 0, 0.04),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.92);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: cardEntrance 0.8s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    main::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: left 0.7s ease;
+    }
+    
+    main:hover::before {
+      left: 100%;
+    }
+    
+    @keyframes cardEntrance {
+      0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    
+    h1 {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+      padding-bottom: 10px;
+      animation: titleGlow 3s ease-in-out infinite alternate;
+    }
+    
+    @keyframes titleGlow {
+      0% {
+        text-shadow: 0 0 5px rgba(67, 97, 238, 0.3);
+      }
+      100% {
+        text-shadow: 0 0 15px rgba(114, 9, 183, 0.4);
+      }
+    }
+    
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      border-radius: 2px;
+      animation: linePulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes linePulse {
+      0%, 100% { width: 60px; }
+      50% { width: 80px; }
+    }
+    
+    /* Flash Messages */
+    .flash-message {
+      border-left: 4px solid var(--error-color);
+      animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .flash-message::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.05), transparent);
+      animation: shimmer 2s infinite;
+    }
+    
+    @keyframes slideIn {
+      0% {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    /* Suggestions Section */
+    .suggestions-section {
+      background: linear-gradient(135deg, #f0f4ff 0%, #e6f7ff 100%);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(67, 97, 238, 0.1);
+      animation: fadeIn 0.6s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    .suggestions-section h3 {
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .suggestions-section h3::before {
+      content: '💡';
+      font-size: 1.2rem;
+    }
+    
+    .suggestion-button {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      color: white;
+      font-weight: 500;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(67, 97, 238, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .suggestion-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+    }
+    
+    .suggestion-button::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .suggestion-button:hover::after {
+      left: 100%;
+    }
+    
+    /* Form Elements */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      animation: formEntrance 0.8s ease-out 0.2s both;
+    }
+    
+    @keyframes formEntrance {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .form-label {
+      display: flex;
+      flex-direction: column;
+      font-weight: 500;
+      color: var(--text-primary);
+      position: relative;
+    }
+    
+    .form-label::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+    
+    .form-label:focus-within::after {
+      transform: scaleX(1);
+    }
+    
+    .form-select, .form-input {
+      margin-top: 0.5rem;
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .form-select:focus, .form-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+    }
+    
+    .form-select option {
+      padding: 0.5rem;
+    }
+    
+    /* Submit Button */
+    .submit-button {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      color: white;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 4px 6px -1px rgba(67, 97, 238, 0.3);
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      margin-top: 1rem;
+    }
+    
+    .submit-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px -3px rgba(67, 97, 238, 0.5);
+    }
+    
+    .submit-button:active {
+      transform: translateY(0);
+    }
+    
+    .submit-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.7s ease;
+    }
+    
+    .submit-button:hover::before {
+      left: 100%;
+    }
+    
+    /* Chart Preview Section */
+    .chart-preview {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      animation: previewEntrance 0.8s ease-out;
+    }
+    
+    @keyframes previewEntrance {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .download-button {
+      background: linear-gradient(135deg, var(--success-color), #0d9488);
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      color: white;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .download-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+    }
+    
+    /* Back Link */
+    .back-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      margin-top: 1.5rem;
+    }
+    
+    .back-link:hover {
+      color: var(--secondary-color);
+      transform: translateX(-5px);
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      main {
+        padding: 1.5rem;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      h1 {
+        font-size: 1.75rem;
+      }
+    }
+    
+    /* Loading Animation */
+    .loading {
+      position: relative;
+      pointer-events: none;
+    }
+    
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid transparent;
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+  <main class="w-full max-w-5xl rounded-2xl p-8">
+    
+    <h1 class="text-3xl font-bold mb-6 text-center">📊 Configure Chart</h1>
 
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <ul class="mb-4 space-y-2">
           {% for message in messages %}
-            <li class="bg-red-100 text-red-700 px-4 py-2 rounded-lg text-sm">
+            <li class="flash-message bg-red-50 text-red-700 px-4 py-2 rounded-lg text-sm">
               {{ message }}
             </li>
           {% endfor %}
@@ -25,8 +436,8 @@
     {% endwith %}
 
     <!-- Suggestions -->
-    <section class="mb-6">
-      <h3 class="text-lg font-semibold text-gray-700 mb-3">Suggestions</h3>
+    <section class="suggestions-section">
+      <h3 class="text-lg font-semibold">Suggestions</h3>
       <div class="flex flex-wrap gap-2">
         {% for ctype, sx, sy in suggestions %}
           <form action="" method="post" class="inline">
@@ -34,8 +445,7 @@
             <input type="hidden" name="x" value="{{ sx }}">
             <input type="hidden" name="y" value="{{ sy }}">
             <input type="hidden" name="title" value="Suggested: {{ ctype|capitalize }}">
-            <button type="submit" 
-              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition">
+            <button type="submit" class="suggestion-button">
               {{ ctype|capitalize }} (x={{ sx }}{% if sy %}, y={{ sy }}{% endif %})
             </button>
           </form>
@@ -44,14 +454,13 @@
     </section>
 
     <!-- Chart Config Form -->
-    <form action="" method="post" class="space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <form action="" method="post" class="space-y-6" id="chartForm">
+      <div class="form-grid">
 
         <!-- Chart Type -->
-        <label class="flex flex-col text-sm font-medium text-gray-700">
+        <label class="form-label">
           Chart Type
-          <select name="chart" required
-            class="mt-1 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
+          <select name="chart" required class="form-select">
             {% for value, label in chart_types %}
               <option value="{{ value }}" {% if selected.chart==value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
@@ -59,10 +468,9 @@
         </label>
 
         <!-- X Axis -->
-        <label class="flex flex-col text-sm font-medium text-gray-700">
+        <label class="form-label">
           X Axis
-          <select name="x"
-            class="mt-1 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
+          <select name="x" class="form-select">
             <option value="">(none)</option>
             {% for c in columns %}
               <option value="{{ c }}" {% if selected.x==c %}selected{% endif %}>{{ c }} ({{ kinds[c] }})</option>
@@ -71,10 +479,9 @@
         </label>
 
         <!-- Y Axis -->
-        <label class="flex flex-col text-sm font-medium text-gray-700">
+        <label class="form-label">
           Y Axis
-          <select name="y"
-            class="mt-1 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
+          <select name="y" class="form-select">
             <option value="">(none)</option>
             {% for c in columns %}
               <option value="{{ c }}" {% if selected.y==c %}selected{% endif %}>{{ c }} ({{ kinds[c] }})</option>
@@ -83,10 +490,9 @@
         </label>
 
         <!-- Color -->
-        <label class="flex flex-col text-sm font-medium text-gray-700">
+        <label class="form-label">
           Color (Group)
-          <select name="color"
-            class="mt-1 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
+          <select name="color" class="form-select">
             <option value="">(none)</option>
             {% for c in columns %}
               <option value="{{ c }}" {% if selected.color==c %}selected{% endif %}>{{ c }} ({{ kinds[c] }})</option>
@@ -95,10 +501,9 @@
         </label>
 
         <!-- Aggregate -->
-        <label class="flex flex-col text-sm font-medium text-gray-700">
+        <label class="form-label">
           Aggregate (for Bar/Pie)
-          <select name="agg"
-            class="mt-1 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500">
+          <select name="agg" class="form-select">
             <option value="">(none)</option>
             <option value="sum" {% if selected.agg=='sum' %}selected{% endif %}>Sum</option>
             <option value="mean" {% if selected.agg=='mean' %}selected{% endif %}>Average</option>
@@ -108,29 +513,26 @@
         </label>
 
         <!-- Title -->
-        <label class="flex flex-col text-sm font-medium text-gray-700">
+        <label class="form-label">
           Title
-          <input type="text" name="title" value="{{ selected.title or '' }}" placeholder="Chart title"
-            class="mt-1 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          <input type="text" name="title" value="{{ selected.title or '' }}" placeholder="Chart title" class="form-input" />
         </label>
 
         <!-- Palette -->
-        <label class="flex flex-col text-sm font-medium text-gray-700">
+        <label class="form-label">
           Palette / Scale
-          <input type="text" name="palette" value="{{ selected.palette or '' }}" placeholder="e.g., Viridis, Plasma"
-            class="mt-1 rounded-lg border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          <input type="text" name="palette" value="{{ selected.palette or '' }}" placeholder="e.g., Viridis, Plasma" class="form-input" />
         </label>
       </div>
 
-      <button type="submit"
-        class="w-full bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition">
+      <button type="submit" class="submit-button" id="submitButton">
         Update Chart
       </button>
     </form>
 
     <!-- Chart Preview -->
     {% if fig_html %}
-      <section class="mt-8 bg-gray-50 rounded-xl p-6 shadow-inner">
+      <section class="chart-preview">
         {{ fig_html | safe }}
         <form action="{{ url_for('download_png', upload_id=upload_id) }}" method="post" class="mt-4">
           <input type="hidden" name="chart" value="{{ selected.chart }}">
@@ -140,17 +542,36 @@
           <input type="hidden" name="agg" value="{{ selected.agg or '' }}">
           <input type="hidden" name="title" value="{{ selected.title or '' }}">
           <input type="hidden" name="palette" value="{{ selected.palette or '' }}">
-          <button type="submit"
-            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
-            Download PNG
+          <button type="submit" class="download-button">
+            <i class="fas fa-download"></i> Download PNG
           </button>
         </form>
       </section>
     {% endif %}
 
-    <p class="mt-6 text-center">
-      <a href="/" class="text-blue-600 hover:underline">⬅️ Upload another file</a>
+    <p class="text-center">
+      <a href="/" class="back-link">
+        <i class="fas fa-arrow-left"></i> Upload another file
+      </a>
     </p>
   </main>
+
+  <script>
+    // Form submission loading animation
+    document.getElementById('chartForm').addEventListener('submit', function(e) {
+      const button = document.getElementById('submitButton');
+      button.classList.add('loading');
+      button.innerHTML = 'Updating Chart...';
+    });
+    
+    // Add subtle animations for form elements
+    document.addEventListener('DOMContentLoaded', function() {
+      const formElements = document.querySelectorAll('.form-label');
+      
+      formElements.forEach((el, index) => {
+        el.style.animationDelay = `${index * 0.05}s`;
+      });
+    });
+  </script>
 </body>
 </html>

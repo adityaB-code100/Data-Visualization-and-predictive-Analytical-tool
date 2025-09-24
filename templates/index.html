@@ -5,17 +5,454 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CSV Visualizer</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --primary-dark: #3a56d4;
+      --secondary-color: #7209b7;
+      --accent-color: #4cc9f0;
+      --light-bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-primary: #2d3748;
+      --text-secondary: #4a5568;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --error-color: #ef4444;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      animation: gradientShift 15s ease infinite;
+      background-size: 200% 200%;
+    }
+    
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    main {
+      box-shadow: 
+        0 10px 25px -5px rgba(0, 0, 0, 0.1), 
+        0 10px 10px -5px rgba(0, 0, 0, 0.04),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.92);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: cardEntrance 0.8s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    main::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: left 0.7s ease;
+    }
+    
+    main:hover::before {
+      left: 100%;
+    }
+    
+    @keyframes cardEntrance {
+      0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    
+    main:hover {
+      box-shadow: 
+        0 20px 40px -10px rgba(0, 0, 0, 0.15), 
+        0 10px 10px -5px rgba(0, 0, 0, 0.05),
+        0 0 0 1px rgba(255, 255, 255, 0.2);
+      transform: translateY(-5px);
+    }
+    
+    h1 {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+      padding-bottom: 10px;
+      animation: titleGlow 3s ease-in-out infinite alternate;
+    }
+    
+    @keyframes titleGlow {
+      0% {
+        text-shadow: 0 0 5px rgba(67, 97, 238, 0.3);
+      }
+      100% {
+        text-shadow: 0 0 15px rgba(114, 9, 183, 0.4);
+      }
+    }
+    
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      border-radius: 2px;
+      animation: linePulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes linePulse {
+      0%, 100% { width: 60px; }
+      50% { width: 80px; }
+    }
+    
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 2px dashed #cbd5e0;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      background: #f7fafc;
+      animation: fileAreaEntrance 0.6s ease-out 0.2s both;
+    }
+    
+    @keyframes fileAreaEntrance {
+      0% {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .file-input-wrapper:hover {
+      border-color: var(--primary-color);
+      background: #edf2f7;
+      transform: scale(1.01);
+    }
+    
+    .file-input-wrapper.has-file {
+      border-color: var(--success-color);
+      background: #f0fdf4;
+      animation: fileSuccess 0.5s ease;
+    }
+    
+    @keyframes fileSuccess {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    
+    .file-input-wrapper.drag-over {
+      border-color: var(--accent-color);
+      background: #e0f2fe;
+      transform: scale(1.02);
+    }
+    
+    input[type="file"] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+    
+    .file-input-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .file-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary-color);
+      transition: all 0.3s ease;
+      animation: iconFloat 3s ease-in-out infinite;
+    }
+    
+    @keyframes iconFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    
+    .file-input-wrapper:hover .file-icon {
+      color: var(--secondary-color);
+      transform: scale(1.1);
+    }
+    
+    .file-input-text {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+      transition: all 0.3s ease;
+    }
+    
+    .file-input-subtext {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      transition: all 0.3s ease;
+    }
+    
+    .upload-button {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      color: white;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 4px 6px -1px rgba(67, 97, 238, 0.3);
+      position: relative;
+      overflow: hidden;
+      animation: buttonEntrance 0.6s ease-out 0.4s both;
+    }
+    
+    @keyframes buttonEntrance {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .upload-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px -3px rgba(67, 97, 238, 0.5);
+    }
+    
+    .upload-button:active {
+      transform: translateY(0);
+    }
+    
+    .upload-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.7s ease;
+    }
+    
+    .upload-button:hover::before {
+      left: 100%;
+    }
+    
+    .upload-button::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.4s ease, height 0.4s ease;
+    }
+    
+    .upload-button:active::after {
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+    }
+    
+    .flash-message {
+      border-left: 4px solid var(--error-color);
+      animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .flash-message::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.05), transparent);
+      animation: shimmer 2s infinite;
+    }
+    
+    @keyframes slideIn {
+      0% {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    details {
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.4s ease;
+      animation: detailsEntrance 0.6s ease-out 0.6s both;
+    }
+    
+    @keyframes detailsEntrance {
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    details[open] {
+      background: #f0f4f8;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    
+    summary {
+      padding: 1rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+      position: relative;
+      list-style: none;
+    }
+    
+    summary::-webkit-details-marker {
+      display: none;
+    }
+    
+    summary::after {
+      content: '+';
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+    }
+    
+    details[open] summary::after {
+      content: '-';
+      transform: translateY(-50%) rotate(0deg);
+    }
+    
+    summary:hover {
+      background: #e2e8f0;
+    }
+    
+    details p {
+      padding: 0 1rem 1rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      animation: contentReveal 0.4s ease;
+    }
+    
+    @keyframes contentReveal {
+      0% {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Loading animation for form submission */
+    .loading {
+      position: relative;
+      pointer-events: none;
+    }
+    
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid transparent;
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      main {
+        margin: 1rem;
+        padding: 1.5rem;
+      }
+      
+      h1 {
+        font-size: 1.75rem;
+      }
+      
+      .file-input-label {
+        padding: 1.5rem;
+      }
+    }
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-  <main class="w-full max-w-lg bg-white shadow-lg rounded-2xl p-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">📂 Upload CSV</h1>
+<body class="min-h-screen flex items-center justify-center p-4">
+  <main class="w-full max-w-lg rounded-2xl p-8">
+    <h1 class="text-3xl font-bold mb-6 text-center">📊 CSV Data Visualizer</h1>
     
     <!-- Flash messages -->
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <ul class="mb-4 space-y-2">
           {% for message in messages %}
-            <li class="bg-red-100 text-red-700 px-4 py-2 rounded-lg text-sm">
+            <li class="flash-message bg-red-50 text-red-700 px-4 py-3 rounded-lg text-sm">
               {{ message }}
             </li>
           {% endfor %}
@@ -24,35 +461,121 @@
     {% endwith %}
 
     <!-- Upload form -->
-    <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data" class="space-y-4">
-      <input 
-        type="file" 
-        name="file" 
-        accept=".csv" 
-        required 
-        class="block w-full text-sm text-gray-700 
-               file:mr-4 file:py-2 file:px-4 
-               file:rounded-lg file:border-0
-               file:text-sm file:font-semibold
-               file:bg-blue-600 file:text-white
-               hover:file:bg-blue-700
-               cursor-pointer"
-      />
+    <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data" class="space-y-4" id="uploadForm">
+      <div class="file-input-wrapper" id="fileInputWrapper">
+        <input 
+          type="file" 
+          name="file" 
+          id="fileInput"
+          accept=".csv" 
+          required 
+        />
+        <label for="fileInput" class="file-input-label">
+          <div class="file-icon">📁</div>
+          <div class="file-input-text">Choose a CSV file</div>
+          <div class="file-input-subtext">or drag and drop here</div>
+        </label>
+      </div>
+      
       <button 
         type="submit" 
-        class="w-full bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition">
-        Upload
+        class="upload-button w-full font-medium py-3 px-4"
+        id="uploadButton"
+      >
+        Upload & Visualize
       </button>
     </form>
 
     <!-- Tips -->
-    <details class="mt-6 bg-gray-50 rounded-lg p-4">
-      <summary class="cursor-pointer font-semibold text-gray-700">💡 Tips</summary>
-      <p class="mt-2 text-sm text-gray-600">
-        Supported: UTF-8 / CP1252 CSV.<br>
-        We attempt automatic date parsing and trimming.
+    <details class="mt-6 rounded-lg">
+      <summary class="rounded-lg">💡 Data Visualization Tips</summary>
+      <p class="mt-2 text-sm">
+        • Supported encodings: UTF-8, CP1252<br>
+        • Automatic date parsing and data trimming<br>
+        • Large files may take longer to process<br>
+        • Ensure your CSV has a header row for best results
       </p>
     </details>
   </main>
+
+  <script>
+    // Enhance file input with visual feedback
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const wrapper = document.getElementById('fileInputWrapper');
+      const label = wrapper.querySelector('.file-input-text');
+      const subtext = wrapper.querySelector('.file-input-subtext');
+      
+      if (this.files.length > 0) {
+        wrapper.classList.add('has-file');
+        label.textContent = this.files[0].name;
+        subtext.textContent = `Size: ${(this.files[0].size / 1024).toFixed(2)} KB`;
+        
+        // Add a small success animation
+        setTimeout(() => {
+          wrapper.classList.remove('has-file');
+        }, 1000);
+      } else {
+        wrapper.classList.remove('has-file');
+        label.textContent = 'Choose a CSV file';
+        subtext.textContent = 'or drag and drop here';
+      }
+    });
+    
+    // Add drag and drop functionality
+    const fileInputWrapper = document.getElementById('fileInputWrapper');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      fileInputWrapper.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+      fileInputWrapper.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+      fileInputWrapper.addEventListener(eventName, unhighlight, false);
+    });
+    
+    function highlight() {
+      fileInputWrapper.classList.add('drag-over');
+    }
+    
+    function unhighlight() {
+      fileInputWrapper.classList.remove('drag-over');
+    }
+    
+    fileInputWrapper.addEventListener('drop', handleDrop, false);
+    
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      
+      if (files.length > 0) {
+        document.getElementById('fileInput').files = files;
+        document.getElementById('fileInput').dispatchEvent(new Event('change'));
+      }
+    }
+    
+    // Form submission loading animation
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+      const button = document.getElementById('uploadButton');
+      button.classList.add('loading');
+      button.innerHTML = 'Processing...';
+    });
+    
+    // Add subtle entrance animations for all elements
+    document.addEventListener('DOMContentLoaded', function() {
+      const elements = document.querySelectorAll('h1, .file-input-wrapper, .upload-button, details');
+      
+      elements.forEach((el, index) => {
+        el.style.animationDelay = `${index * 0.1}s`;
+      });
+    });
+  </script>
 </body>
 </html>
